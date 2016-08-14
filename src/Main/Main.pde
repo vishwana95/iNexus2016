@@ -244,7 +244,9 @@ void loop()
 void test(){
 	Serial.println("Testing.. ");
 
-		while(1){
+	setPID(8, 0.0, 16); 
+	while(1){
+			/*
 			motorLeft_foward(150);
 			delay(1000);
 			motorLeft_stop();
@@ -271,8 +273,32 @@ void test(){
 			delay(1000);
 			stop();
 			delay(5000);
+			*/
 
-			//testSonar();
-			
+		//testSonar();
+
+		
+
+		if(getLeftSonarReading()>20){ //There is no left wall
+			//Turn Left
+			rotateAntiClockwise90();
 		}
+		else{
+			if(getFrontSonarReading() > 10){ //There is no front wall
+				//Move forward
+				path_follow_PID_Sonar();
+			}
+			else{
+				if(getRightSonarReading() > 20){ //There is no right wall
+					//turn right
+					rotateClockwise90();
+				}
+				else{
+					//turn back
+					rotateClockwise180();
+				}
+			}
+		}
+			
+	}
 }

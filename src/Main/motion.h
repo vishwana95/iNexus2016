@@ -14,6 +14,7 @@
 #include "sensorPanel.h"
 #include "status.h"
 #include "encoder.h"
+#include "diuSonar.h"
 
 /********************* pin naming ***************************************/
 
@@ -65,6 +66,8 @@ void calibrateSensors();
 void line_following_pd();
 void path_follow_PID();
 void simple_path_follow();
+
+void path_follow_PID_Sonar();
 
 
 /************************** function definitions ************************/
@@ -552,6 +555,70 @@ void simple_path_follow(){
             //sendSensorStatus();
 			delay(1000);
 	}
+}
+
+
+
+
+
+void path_follow_PID_Sonar(){
+
+	int sonarFrontDis = getFrontSonarReading();
+	
+	int sonarRightDis = getRightSonarReading();
+	int sonarLeftDis = getLeftSonarReading();
+
+	deviation =  sonarLeftDis - sonarRightDis;
+	Serial.write("Deviation :");
+	Serial.println(deviation);
+
+	integral_correction = Ki*totalError;
+	if(integral_correction > 50)
+		integral_correction = 50;
+	if(integral_correction < -50)
+		integral_correction = -50;
+
+	correction =  Kp*deviation + integral_correction + Kd*(deviation-previousDeviation);
+	totalError += correction;
+	previousDeviation = deviation;
+
+	if(correction > 50)
+		correction = 50;
+	if(correction < -50)
+		correction = -50;
+
+	PID_LeftRPM = 150;
+	PID_RightRPM = 150 + (int)correction;
+
+	if(correction > 0)
+	{
+		PID_LeftRPM  = 150 - (int)correction;
+		PID_RightRPM = 150;
+	}
+
+	/*if(PID_LeftRPM - PID_RightRPM > max_diffrence)
+	{
+	PID_LeftRPM -= (PID_LeftRPM - PID_RightRPM)/factor_diffrence;
+	}
+	else if(PID_RightRPM - PID_LeftRPM > max_diffrence)
+	{
+	PID_RightRPM -= (PID_RightRPM - PID_LeftRPM)/factor_diffrence;
+	}*/
+
+
+	if(PID_LeftRPM > 150)
+		PID_LeftRPM = 150;
+
+	if(PID_RightRPM > 150)
+		PID_RightRPM = 150;
+
+	Serial.write("\tRpm :( ");
+	Serial.print(PID_LeftRPM);
+	Serial.write(" , ");	
+	Serial.print(PID_RightRPM);
+	Serial.println(" )");	
+
+	moveForward(PID_LeftRPM,PID_RightRPM);
 }
 
 
@@ -1250,6 +1317,5 @@ void setPathfolowingPID(boolean isWithBox){
 	else
 		setPID(0.16,0.001,6); 
 }
-
 
 #endif
