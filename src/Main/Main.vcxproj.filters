@@ -1,0 +1,263 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="_core">
+      <UniqueIdentifier>{5e26713c-5c26-4614-947e-30375d92295a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="_libraries">
+      <UniqueIdentifier>{d651634b-3e14-4b77-83ae-27918a794515}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="_libraries\Servo">
+      <UniqueIdentifier>{17510f5c-cb18-4073-b58e-51804c4e41a8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="_libraries\LiquidCrystal">
+      <UniqueIdentifier>{28f3c9bd-330f-4f1d-8a69-cc6475a74727}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="_libraries\QTRSensors">
+      <UniqueIdentifier>{d651e373-191e-41da-a0ea-069804d44656}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Main.pde" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="motion.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="dataTypes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="configuration.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="debug.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="sensorPanel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="algorithm.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="test.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="status.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="diuEEPROM.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="encoder.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="sharpIR.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="diuServo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="diuSonar.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\Electronic\Softwares\Arduino Setup\arduino-0023\hardware\arduino\cores\arduino\binary.h">
+      <Filter>_core</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\Electronic\Softwares\Arduino Setup\arduino-0023\hardware\arduino\cores\arduino\HardwareSerial.h">
+      <Filter>_core</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\Electronic\Softwares\Arduino Setup\arduino-0023\hardware\arduino\cores\arduino\pins_arduino.h">
+      <Filter>_core</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\Electronic\Softwares\Arduino Setup\arduino-0023\hardware\arduino\cores\arduino\Print.h">
+      <Filter>_core</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\Electronic\Softwares\Arduino Setup\arduino-0023\hardware\arduino\cores\arduino\Stream.h">
+      <Filter>_core</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\Electronic\Softwares\Arduino Setup\arduino-0023\hardware\arduino\cores\arduino\WCharacter.h">
+      <Filter>_core</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\Electronic\Softwares\Arduino Setup\arduino-0023\hardware\arduino\cores\arduino\WConstants.h">
+      <Filter>_core</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\Electronic\Softwares\Arduino Setup\arduino-0023\hardware\arduino\cores\arduino\wiring.h">
+      <Filter>_core</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\Electronic\Softwares\Arduino Setup\arduino-0023\hardware\arduino\cores\arduino\wiring_private.h">
+      <Filter>_core</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\Electronic\Softwares\Arduino Setup\arduino-0023\hardware\arduino\cores\arduino\WProgram.h">
+      <Filter>_core</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\Electronic\Softwares\Arduino Setup\arduino-0023\hardware\arduino\cores\arduino\WString.h">
+      <Filter>_core</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\Electronic\Softwares\Arduino Setup\arduino-0023\libraries\Servo\Servo.h">
+      <Filter>_libraries\Servo</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\Electronic\Softwares\Arduino Setup\arduino-0023\libraries\LiquidCrystal\LiquidCrystal.h">
+      <Filter>_libraries\LiquidCrystal</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\Electronic\Softwares\Arduino Setup\arduino-0023\libraries\QTRSensors\QTRSensors.h">
+      <Filter>_libraries\QTRSensors</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="aStar.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="fsa.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="diuOptimalPath.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="indicator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="diuSwitch.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="algorithm_beta.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Visual Micro\.Main.vsarduino.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Visual Micro\.Main - Copy.vsarduino.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\Softwares\arduino-0023\hardware\arduino\cores\arduino\binary.h">
+      <Filter>_core</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\Softwares\arduino-0023\hardware\arduino\cores\arduino\HardwareSerial.h">
+      <Filter>_core</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\Softwares\arduino-0023\hardware\arduino\cores\arduino\pins_arduino.h">
+      <Filter>_core</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\Softwares\arduino-0023\hardware\arduino\cores\arduino\Print.h">
+      <Filter>_core</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\Softwares\arduino-0023\hardware\arduino\cores\arduino\Stream.h">
+      <Filter>_core</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\Softwares\arduino-0023\hardware\arduino\cores\arduino\WCharacter.h">
+      <Filter>_core</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\Softwares\arduino-0023\hardware\arduino\cores\arduino\WConstants.h">
+      <Filter>_core</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\Softwares\arduino-0023\hardware\arduino\cores\arduino\wiring.h">
+      <Filter>_core</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\Softwares\arduino-0023\hardware\arduino\cores\arduino\wiring_private.h">
+      <Filter>_core</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\Softwares\arduino-0023\hardware\arduino\cores\arduino\WProgram.h">
+      <Filter>_core</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\Softwares\arduino-0023\hardware\arduino\cores\arduino\WString.h">
+      <Filter>_core</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="E:\Electronic\Softwares\Arduino Setup\arduino-0023\hardware\arduino\cores\arduino\Print.cpp">
+      <Filter>_core</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\Electronic\Softwares\Arduino Setup\arduino-0023\hardware\arduino\cores\arduino\Tone.cpp">
+      <Filter>_core</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\Electronic\Softwares\Arduino Setup\arduino-0023\hardware\arduino\cores\arduino\WInterrupts.c">
+      <Filter>_core</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\Electronic\Softwares\Arduino Setup\arduino-0023\hardware\arduino\cores\arduino\wiring.c">
+      <Filter>_core</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\Electronic\Softwares\Arduino Setup\arduino-0023\hardware\arduino\cores\arduino\wiring_analog.c">
+      <Filter>_core</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\Electronic\Softwares\Arduino Setup\arduino-0023\hardware\arduino\cores\arduino\wiring_digital.c">
+      <Filter>_core</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\Electronic\Softwares\Arduino Setup\arduino-0023\hardware\arduino\cores\arduino\wiring_pulse.c">
+      <Filter>_core</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\Electronic\Softwares\Arduino Setup\arduino-0023\hardware\arduino\cores\arduino\wiring_shift.c">
+      <Filter>_core</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\Electronic\Softwares\Arduino Setup\arduino-0023\hardware\arduino\cores\arduino\WMath.cpp">
+      <Filter>_core</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\Electronic\Softwares\Arduino Setup\arduino-0023\hardware\arduino\cores\arduino\WString.cpp">
+      <Filter>_core</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\Electronic\Softwares\Arduino Setup\arduino-0023\libraries\Servo\Servo.cpp">
+      <Filter>_libraries\Servo</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\Electronic\Softwares\Arduino Setup\arduino-0023\libraries\LiquidCrystal\LiquidCrystal.cpp">
+      <Filter>_libraries\LiquidCrystal</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\Electronic\Softwares\Arduino Setup\arduino-0023\libraries\QTRSensors\QTRSensors.cpp">
+      <Filter>_libraries\QTRSensors</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Softwares\arduino-0023\hardware\arduino\cores\arduino\HardwareSerial.cpp">
+      <Filter>_core</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Softwares\arduino-0023\hardware\arduino\cores\arduino\main.cpp">
+      <Filter>_core</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Softwares\arduino-0023\hardware\arduino\cores\arduino\pins_arduino.c">
+      <Filter>_core</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Softwares\arduino-0023\hardware\arduino\cores\arduino\Print.cpp">
+      <Filter>_core</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Softwares\arduino-0023\hardware\arduino\cores\arduino\Tone.cpp">
+      <Filter>_core</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Softwares\arduino-0023\hardware\arduino\cores\arduino\WInterrupts.c">
+      <Filter>_core</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Softwares\arduino-0023\hardware\arduino\cores\arduino\wiring.c">
+      <Filter>_core</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Softwares\arduino-0023\hardware\arduino\cores\arduino\wiring_analog.c">
+      <Filter>_core</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Softwares\arduino-0023\hardware\arduino\cores\arduino\wiring_digital.c">
+      <Filter>_core</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Softwares\arduino-0023\hardware\arduino\cores\arduino\wiring_pulse.c">
+      <Filter>_core</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Softwares\arduino-0023\hardware\arduino\cores\arduino\wiring_shift.c">
+      <Filter>_core</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Softwares\arduino-0023\hardware\arduino\cores\arduino\WMath.cpp">
+      <Filter>_core</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Softwares\arduino-0023\hardware\arduino\cores\arduino\WString.cpp">
+      <Filter>_core</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Main.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+</Project>

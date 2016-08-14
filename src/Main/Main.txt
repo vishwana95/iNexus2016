@@ -1,0 +1,1641 @@
+// Authors: Diunuge Buddhika Wijesinghe
+// Competition iNexus 2013
+// version: 2.0v: Not Optimized
+// Last mod: 12-11-2012
+
+/********************* include libraries *******************************/
+
+#include <Servo.h>
+#include <LiquidCrystal.h>
+#include <QTRSensors.h>
+#include "dataTypes.h"
+#include "motion.h"
+#include "configuration.h"
+#include "debug.h"
+#include "test.h"
+#include "status.h"
+#include "diuEEPROM.h"
+#include "encoder.h"
+#include "diuServo.h"
+#include "diuSonar.h"
+#include "diuOptimalPath.h"
+#include <NewPing.h>
+#include "indicator.h"
+
+/* setup code goes here */
+void setup()
+{
+	//Do common initialization which is not dependable of type of run
+	Serial.begin(9600);
+
+	//configurations
+	initializeSensorPanel();
+	initializeMotors();
+	initializeEncorders();
+	initializeStatus();
+	initializeServo();
+	initializeIndicators();
+
+	releaseFrontBox();
+	
+	//if this is dry run: find and save grid parameters: initialize variables
+	if(isDryRun()){
+		//initialize the grid parameters
+		for(int counter0=0; counter0<(NO_OF_GRID_ROWS-1); counter0++)
+			for(int counter1=0; counter1<(NO_OF_GRID_COLUMNS-1); counter1++){
+				grid[counter0][counter1] = NODE_IS_ALLOWED;
+			}
+		
+	}
+	//if this is main run: load the parameters from dry run
+	else{
+		
+		//Load grid status
+		//eeprom_read_block((void*)&grid, (void*)0, sizeof(grid));
+
+		//load transfer zone location
+		//eeprom_read_block((void*)&transerzone, (void*)100, sizeof(transerzone));
+	}
+
+	for(int i=0; i<9; i++){
+		sensorValuesMax[i] = 1023;
+		sensorValuesMin[i] = 0;
+	}
+
+	for(int i=0; i<6; i++){
+		sensorValuesBackMax[i] = 1023;
+		sensorValuesBackMin[i] = 0;
+	}
+
+	
+}
+
+/****************    end of setup()   ***************************/
+
+/* main loop after setup code */
+void loop()
+{
+	Serial.println();
+	Serial.println();
+	Serial.write("Starting..");
+	delay(1000);
+
+	setTest(true);
+	setDryRun(false);
+	if(isTesting()){
+		//test codes goes here
+	
+		Serial.println("Testing.. ");
+		//int count;
+		/*
+		sensorValuesMax[4] = 567;
+		loadCalibrations();
+		setPID(0.16, 0.000, 8.0);  // 0.1 0.0004 4.0
+		setReversePID(0.02,0.0,2);
+		
+		blink(RED,1);
+		for(counter=0; counter<30; counter++)
+				sensorPannelBack.calibrate();
+		blink(RED,2);*/
+		releaseFrontServo();
+		setHandElevation(20);
+		releaseElevationServo();
+		backSensorPanel(ENABLE);
+		while(1){
+			
+			//testMotorSpeed();
+			//sendSensorStatusAnalog();
+			//gotoNextFrontNode();
+			rotateClockwise90bySensors();
+			delay(1000);
+			rotateAntiClockwise90bySensors();
+			delay(500);
+			/*
+			servoFrontElevator.write(15); 
+			delay(1000);
+			servoFrontElevator.write(20); 
+			delay(1000);
+			servoFrontElevator.write(25); 
+			delay(1000);
+			servoFrontElevator.write(9);
+			
+			//sendSonarReadings();
+			//tsetIndicators();
+			//testMotorSpeed();
+			//testRotation90();
+			//testServoFrontGrip();
+			//findTransferZone();
+			//sendSensorStatus();
+			//line_following_pd();
+			//sendSensorStatusAnalog();*/
+			delay(300);
+			
+		}
+	}
+
+	setPID(0.16, 0.0, 8.0);  //0.1,  0 ,  2
+	setPIDSlow(0.16, 0.0, 8.0); 
+	setPIDSlowSlow(0.16, 0.0, 8.0); 
+	setReversePID(0.1,0.0001,6);
+	setReversePIDSlow(0.1,0.0001,6);
+	setReversePIDSlowSlow(0.1,0.0001,6);
+
+	if(isDryRun()){ //this is dry run
+
+		DRY_RUN_STATE = RUN_TYPE_STARTED;
+		Serial.println("Starting the dry run.. ");
+
+		while(1){
+
+			//switch dry run types
+			
+			if(DRY_RUN_STATE==RUN_TYPE_STARTED){
+
+				testSwitches();
+				//calibrate
+				if(getSwitchStatus(SELECTION_SWITCH_0)==OFF && getSwitchStatus(SELECTION_SWITCH_1)==OFF){
+					dryRunCalibration();
+				}
+
+				//search nodes algo 1(using refresh grid nodes)
+				else if(getSwitchStatus(SELECTION_SWITCH_0)==OFF && getSwitchStatus(SELECTION_SWITCH_1)==ON){
+					Serial.println("Discover the grid.. ");
+					//loadCalibrations();
+					caliibrateSensorsBySensors();
+					discoverGrid();
+					sendGridStatus();  //debug
+
+					findTransferZone();
+				}
+
+				//search nodes algo 2(using previous grid nodes)
+				else if(getSwitchStatus(SELECTION_SWITCH_0)==ON && getSwitchStatus(SELECTION_SWITCH_1)==OFF){
+					Serial.println("Discover the missing nodes.. ");
+				}
+
+				//search transfer zones
+				else{
+					Serial.println("Discover the transfer zones.. ");
+
+					loadCalibrations();
+					setPID(0.2,0.002,34);
+					gotoNextFrontNodeUnknownDistance();
+					gotoNextFrontNodeSlow();
+					updateState(EAST, createNode(0,1));
+					turnToDirection(NORTH);
+					for(counter=0; counter<4; counter++)
+						gotoNextFrontNode();
+					gotoNextFrontNodeSlow();
+					turnToDirection(WEST);
+					gotoNextFrontNode();
+					updateState(createNode(5,0));
+
+					findTransferZone();
+				}
+				DRY_RUN_STATE = RUN_TYPE_FINISHED;
+				Serial.println("End the dry run.. ");
+			}
+
+			else
+				stop();
+			
+
+			/*
+			if(DRY_RUN_STATE==RUN_TYPE_STARTED){
+				discoverGrid();
+				sendGridStatus();
+				findTransferZone();
+				//for debug
+				sendGridStatus();
+				DRY_RUN_STATE = RUN_TYPE_FINISHED;
+			}
+
+			else
+				stop();
+
+			*/
+		}
+	}
+	else{
+		Serial.println("Starting the competition... ");
+
+		ACTIVE_RUN_STATE = RUN_TYPE_STARTED;
+
+		eeprom_read_block((void*)&grid, (void*)0, sizeof(grid));
+		eeprom_read_block((void*)&keyBlockTranserzone, (void*)100, sizeof(keyBlockTranserzone));
+
+		//sendGridStatus();
+		//printNode(&transerzone,"Transfer zone node");
+
+		while(1){
+			
+			if(ACTIVE_RUN_STATE==RUN_TYPE_STARTED){
+
+				waitForTheLanding();
+				caliibrateSensorsStraight();
+				land();
+				
+				node moneyBox = findMoneyBox();
+				printNode(&moneyBox, "Money box at");
+				
+				depositeMoneyBox(&moneyBox);
+				
+				waitForTheKey();
+				unlockTheTreasure();
+				/*
+				
+				finish();
+				*/
+				//for debug
+				//sendGridStatus();
+				ACTIVE_RUN_STATE = RUN_TYPE_FINISHED;
+			}
+
+			else
+				stop();
+
+		}
+	}
+
+	return;
+}
+/******************   end of loop()   ********************************/
+
+
+void line_following_reverse_pd_new()
+{
+	position = sensorPannelBack.readLine(sensorsBack);
+	error = position - 2500;
+
+	//Serial.println(error);
+	//Kp_Back = 0.1;
+	//Kd_Back = 4;
+	//Ki_Back = 0.0;
+  
+	motorSpeed = Kp_Back * error + Kd_Back * (error - lastError) + Ki_Back * totalError;
+	lastError = error;
+	totalError += error;
+
+  
+	PID_RightRPM = MAX_RPM - motorSpeed;
+	PID_LeftRPM = MAX_RPM + motorSpeed;
+
+	if (PID_RightRPM < 0)
+		PID_RightRPM = 0;
+	if (PID_LeftRPM < 0)
+		PID_LeftRPM = 0;
+ 
+	if (PID_RightRPM > 255)
+		PID_RightRPM = 255;
+    
+	if (PID_LeftRPM > 255)
+		PID_LeftRPM = 255;
+ 
+	reverse(PID_LeftRPM, PID_RightRPM);
+}
+
+
+void waitForTheLanding(){
+
+	unsigned int distance = getFrontSonarReading();
+
+	while(distance!=0 && distance<20){
+		delay(500);
+		distance = getFrontSonarReading();
+		//Serial.println(distance);
+	}
+
+	//wait for adjesments
+	delay(2000); //3000
+}
+
+void caliibrateSensorsBySensors(){
+	Serial.println("Calibrating start..");
+	int i;
+	#define motionSpeed 120
+
+	backSensorPanel(ENABLE);
+
+	int beginEncoderCount = getRighttEncoderCount();
+	rotateAntiClockwise(200,200);
+	delay(50);
+
+	rotateAntiClockwise(motionSpeed,motionSpeed);
+	while((getRighttEncoderCount()-beginEncoderCount)<20){
+		sensorPannel.calibrate();
+		sensorPannelBack.calibrate();
+	}
+
+	//Serial.println(getRighttEncoderCount()-beginEncoderCount);
+
+	beginEncoderCount = getRighttEncoderCount();
+
+	rotateClockwise(200,200);
+	delay(50);
+
+	rotateClockwise(motionSpeed,motionSpeed);
+	while((getRighttEncoderCount()-beginEncoderCount)<10){
+		sensorPannel.calibrate();
+		sensorPannelBack.calibrate();
+	}
+
+	while(SensorFrontLeft==BLACK || SensorFrontRight==BLACK);
+
+	stop(100);
+	//Serial.println(getRighttEncoderCount()-beginEncoderCount);
+
+	beginEncoderCount = getRighttEncoderCount();
+
+	rotateClockwise(200,200);
+	delay(50);
+
+	rotateClockwise(motionSpeed,motionSpeed);
+	while((getRighttEncoderCount()-beginEncoderCount)<20){
+		sensorPannel.calibrate();
+		sensorPannelBack.calibrate();
+	}
+
+	//Serial.println(getRighttEncoderCount()-beginEncoderCount);
+
+	beginEncoderCount = getRighttEncoderCount();
+
+	rotateAntiClockwise(200,200);
+	delay(50);
+
+	rotateAntiClockwise(motionSpeed,motionSpeed);
+	while((getRighttEncoderCount()-beginEncoderCount)<10){
+		sensorPannel.calibrate();
+		sensorPannelBack.calibrate();
+	}
+
+	while(SensorFrontLeft==BLACK || SensorFrontRight==BLACK);
+
+	stop(100);
+	//Serial.println(getRighttEncoderCount()-beginEncoderCount);
+
+	backSensorPanel(DISABLE);
+	Serial.println("Calibrating end..");
+}
+
+void caliibrateSensorsStraight(){
+
+	#define speed 180 
+	moveForward(220,220);
+	delay(10);
+	moveForward(speed,speed);
+
+	//Serial.println("White Strip");
+	while(Sensor5==WHITE){
+		sensorPannel.calibrate();
+	}
+
+	//stop(100);
+	//moveForward(speed,speed);
+	//Serial.println("Black Strip");
+
+	while(Sensor5==BLACK){
+		sensorPannel.calibrate();
+	}
+	//stop(100);
+	//moveForward(speed,speed);
+	//Serial.println("White Strip");
+
+	while(Sensor5==WHITE){
+		sensorPannel.calibrate();
+	}
+
+	stop(100);
+	Serial.println("End of calibration");
+
+}
+
+void land(){
+	
+	while(Sensor1==BLACK && Sensor5==BLACK && Sensor9==BLACK)
+		moveForward(225,225);
+
+	Serial.println("Found the path");
+
+	int beginEncoderCount = getRighttEncoderCount();
+	while((getRighttEncoderCount()-beginEncoderCount)<60){  
+		line_following_pd_slow();
+	}
+
+	//Serial.println("End of the path");
+	stop(200);
+}
+
+int findTransferZone(){
+
+	printNode(&currentPosition, "Robot at");
+	
+	setReversePID(0.05,0.0001,16);
+	setPID(0.2,0.002,34);
+
+	/*
+	if(currentPosition.x!=5 || currentPosition.y!=0){
+		path pathToTransferZone;
+		node transferZonePathNodes[(NO_OF_GRID_ROWS-1)*(NO_OF_GRID_COLUMNS-1)];
+		pathToTransferZone.nodes = transferZonePathNodes;
+		
+		optimalPathFinder.getShortestPath(currentPosition, currentDirection, createNode(5,0), &pathToTransferZone);
+
+		Serial.println("Path to transfer zone");
+		showPath(&pathToTransferZone);
+	
+		for(int counter0=0; counter0<(pathToTransferZone.length-1); counter0++){
+
+			gotoAdjacentNode(pathToTransferZone.nodes[counter0]);
+			delay(50);
+		}
+		gotoAdjacentNodeSlow(pathToTransferZone.nodes[pathToTransferZone.length-1]);
+		delay(50);
+
+		printNode(&currentPosition, "Now, Robot at");
+	}*/
+
+	
+	while(!isKeyBlockTransferZoneFound || !isAssemblyBlockTransferZoneFound){
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+		delay(500);
+		turnToDirection(WEST);
+
+		//first place
+		Serial.println("Go through first zone");
+
+		backSensorPanel(ENABLE);
+
+		if(isNode())
+			while(isNode())
+				moveForward(150,150);
+
+		delay(10);
+
+		int beginEncoderCount = getRighttEncoderCount();
+		int EnCounter = getRighttEncoderCount()-beginEncoderCount;
+
+		while(EnCounter<32){
+			line_following_pd_slow_slow();
+
+			EnCounter = getRighttEncoderCount()-beginEncoderCount;
+			if(EnCounter>8 && (Sensor3==WHITE || Sensor7 == WHITE)){
+
+				stop();
+				blink(YELLOW, 2);
+
+				if(isKeyBlockTransferZoneFound || isAssemblyBlockTransferZoneFound){ //one transfer zone is already found
+
+					if(isKeyBlockTransferZoneFound && keyBlockTranserzone.x != currentPosition.x){
+						assemblyBlockTransferZone.x = currentPosition.x;
+
+						//write transfer zone location to EEPROM
+						eeprom_write_block((const void*)&assemblyBlockTransferZone, (void*)110, sizeof(assemblyBlockTransferZone));	
+						isAssemblyBlockTransferZoneFound = true;
+
+						printNode(&assemblyBlockTransferZone, "assemblyBlockTransferZone");
+					}
+					else if(isAssemblyBlockTransferZoneFound && assemblyBlockTransferZone.x != currentPosition.x){
+						keyBlockTranserzone.x = currentPosition.x;
+
+						//write transfer zone location to EEPROM
+						eeprom_write_block((const void*)&keyBlockTranserzone, (void*)100, sizeof(keyBlockTranserzone));	
+						isKeyBlockTransferZoneFound = true;
+						printNode(&keyBlockTranserzone, "keyBlockTranserzone");
+
+					}
+					blink(YELLOW,3);
+
+					backSensorPanel(ENABLE);
+					while(!isNode())
+						line_following_reverse_pd_slow_slow();
+
+					backSensorPanel(DISABLE);
+
+					turnToDirection(SOUTH);
+
+					for(int count=0; count<5; count++){
+						gotoNextFrontNode();
+						delay(100);
+					}
+
+					turnToDirection(EAST);
+
+					DRY_RUN_STATE = RUN_TYPE_FINISHED;
+					return 1;
+				}
+
+				else{
+					if(Sensor3==WHITE){  // key Block
+
+						keyBlockTranserzone.x = currentPosition.x;
+
+						//write transfer zone location to EEPROM
+						eeprom_write_block((const void*)&keyBlockTranserzone, (void*)100, sizeof(keyBlockTranserzone));	
+						isKeyBlockTransferZoneFound = true;
+
+						printNode(&keyBlockTranserzone, "keyBlockTranserzone");
+					}
+					else{
+
+						assemblyBlockTransferZone.x = currentPosition.x;
+
+						//write transfer zone location to EEPROM
+						eeprom_write_block((const void*)&assemblyBlockTransferZone, (void*)110, sizeof(assemblyBlockTransferZone));	
+						isAssemblyBlockTransferZoneFound = true;
+
+						printNode(&assemblyBlockTransferZone, "assemblyBlockTransferZone");
+					}
+
+					blink(YELLOW, 3);
+					
+				} // found one transfer zone
+				break;
+			} // detected trnsfer zone
+		}
+		
+		backSensorPanel(ENABLE);
+		while(!isNode())
+			line_following_reverse_pd_slow();
+
+		backSensorPanel(DISABLE);
+		rotateAntiClockwise180();
+		//gotoNextFrontNodeUnknownDistance();
+		updateState(EAST);
+
+		gotoNextFrontNodeUnknownDistance();
+		updateState(createNode(5,1));
+		stop(50);
+		gotoAdjacentNodeSlow(createNode(4,1));
+		stop(50);
+		gotoAdjacentNodeSlow(createNode(4,0));
+		stop(500);
+
+		//second place
+		Serial.println("Go through second zone");
+
+		backSensorPanel(ENABLE);
+
+		if(isNode())
+			while(isNode())
+				moveForward(150,150);
+
+		delay(10);
+
+		beginEncoderCount = getRighttEncoderCount();
+		EnCounter = getRighttEncoderCount()-beginEncoderCount;
+
+		while(EnCounter<32){
+			line_following_pd_slow_slow();
+
+			EnCounter = getRighttEncoderCount()-beginEncoderCount;
+			if(EnCounter>8 && (Sensor3==WHITE || Sensor7 == WHITE)){
+
+				stop();
+				blink(YELLOW, 1);
+
+				if(isKeyBlockTransferZoneFound || isAssemblyBlockTransferZoneFound){ //one transfer zone is already found
+
+					if(isKeyBlockTransferZoneFound && keyBlockTranserzone.x != currentPosition.x){
+						assemblyBlockTransferZone.x = currentPosition.x;
+
+						//write transfer zone location to EEPROM
+						eeprom_write_block((const void*)&assemblyBlockTransferZone, (void*)110, sizeof(assemblyBlockTransferZone));	
+						isAssemblyBlockTransferZoneFound = true;
+
+						printNode(&assemblyBlockTransferZone, "assemblyBlockTransferZone");
+					}
+					else if(isAssemblyBlockTransferZoneFound && assemblyBlockTransferZone.x != currentPosition.x){
+						keyBlockTranserzone.x = currentPosition.x;
+
+						//write transfer zone location to EEPROM
+						eeprom_write_block((const void*)&keyBlockTranserzone, (void*)100, sizeof(keyBlockTranserzone));	
+						isKeyBlockTransferZoneFound = true;
+						printNode(&keyBlockTranserzone, "keyBlockTranserzone");
+
+					}
+					blink(YELLOW,3);
+
+					backSensorPanel(ENABLE);
+					while(!isNode())
+						line_following_reverse_pd_slow_slow();
+
+					backSensorPanel(DISABLE);
+
+					turnToDirection(SOUTH);
+
+					for(int count=0; count<4; count++){
+						gotoNextFrontNode();
+						delay(100);
+					}
+
+					turnToDirection(EAST);
+
+					DRY_RUN_STATE = RUN_TYPE_FINISHED;
+					return 1;
+				}
+
+				else{
+					if(Sensor3==WHITE){  // key Block
+
+						keyBlockTranserzone.x = currentPosition.x;
+
+						//write transfer zone location to EEPROM
+						eeprom_write_block((const void*)&keyBlockTranserzone, (void*)100, sizeof(keyBlockTranserzone));	
+						isKeyBlockTransferZoneFound = true;
+
+						printNode(&keyBlockTranserzone, "keyBlockTranserzone");
+					}
+					else{
+
+						assemblyBlockTransferZone.x = currentPosition.x;
+
+						//write transfer zone location to EEPROM
+						eeprom_write_block((const void*)&assemblyBlockTransferZone, (void*)110, sizeof(assemblyBlockTransferZone));	
+						isAssemblyBlockTransferZoneFound = true;
+
+						printNode(&assemblyBlockTransferZone, "assemblyBlockTransferZone");
+					}
+
+					blink(YELLOW, 3);
+					
+				} // found one transfer zone
+				break;
+			} // detected trnsfer zone
+		}
+		
+		backSensorPanel(ENABLE);
+		while(!isNode())
+			line_following_reverse_pd_slow();
+
+		backSensorPanel(DISABLE);
+		rotateAntiClockwise180();
+		//gotoNextFrontNodeUnknownDistance();
+		updateState(EAST);
+
+		gotoNextFrontNodeUnknownDistance();
+		updateState(createNode(4,1));
+		stop(50);
+		gotoAdjacentNodeSlow(createNode(3,1));
+		stop(50);
+		gotoAdjacentNodeSlow(createNode(3,0));
+		stop(500);
+
+		//second place
+		Serial.println("Go through third zone");
+
+		backSensorPanel(ENABLE);
+
+		beginEncoderCount = getRighttEncoderCount();
+		EnCounter = getRighttEncoderCount()-beginEncoderCount;
+		if(isNode())
+			moveForward(150,150);
+			while(isNode() && EnCounter<6){
+				EnCounter = getRighttEncoderCount()-beginEncoderCount;
+			}
+
+		delay(10);
+
+		beginEncoderCount = getRighttEncoderCount();
+		EnCounter = getRighttEncoderCount()-beginEncoderCount;
+
+		while(EnCounter<24){
+			line_following_pd_slow_slow();
+
+			EnCounter = getRighttEncoderCount()-beginEncoderCount;
+			if(EnCounter>8 && SensorFrontLeft==WHITE && SensorFrontRight==WHITE && SensorMiddleLeft==WHITE && SensorMiddleRight==WHITE){
+
+				stop();
+				blink(YELLOW, 1);
+
+				if(isKeyBlockTransferZoneFound || isAssemblyBlockTransferZoneFound){ //one transfer zone is already found
+
+					if(isKeyBlockTransferZoneFound && keyBlockTranserzone.x != currentPosition.x){
+						assemblyBlockTransferZone.x = currentPosition.x;
+
+						//write transfer zone location to EEPROM
+						eeprom_write_block((const void*)&assemblyBlockTransferZone, (void*)110, sizeof(assemblyBlockTransferZone));	
+						isAssemblyBlockTransferZoneFound = true;
+
+						printNode(&assemblyBlockTransferZone, "assemblyBlockTransferZone");
+					}
+					else if(isAssemblyBlockTransferZoneFound && assemblyBlockTransferZone.x != currentPosition.x){
+						keyBlockTranserzone.x = currentPosition.x;
+
+						//write transfer zone location to EEPROM
+						eeprom_write_block((const void*)&keyBlockTranserzone, (void*)100, sizeof(keyBlockTranserzone));	
+						isKeyBlockTransferZoneFound = true;
+						printNode(&keyBlockTranserzone, "keyBlockTranserzone");
+
+					}
+					blink(YELLOW,3);
+
+					backSensorPanel(ENABLE);
+					while(!isNode())
+						line_following_reverse_pd_slow_slow();
+
+					backSensorPanel(DISABLE);
+
+					turnToDirection(SOUTH);
+
+					for(int count=0; count<3; count++){
+						gotoNextFrontNode();
+						delay(100);
+					}
+
+					turnToDirection(EAST);
+
+					DRY_RUN_STATE = RUN_TYPE_FINISHED;
+					return 1;
+				}
+
+				else{
+					if(Sensor3==WHITE){  // key Block
+
+						keyBlockTranserzone.x = currentPosition.x;
+
+						//write transfer zone location to EEPROM
+						eeprom_write_block((const void*)&keyBlockTranserzone, (void*)100, sizeof(keyBlockTranserzone));	
+						isKeyBlockTransferZoneFound = true;
+
+						printNode(&keyBlockTranserzone, "keyBlockTranserzone");
+					}
+					else{
+
+						assemblyBlockTransferZone.x = currentPosition.x;
+
+						//write transfer zone location to EEPROM
+						eeprom_write_block((const void*)&assemblyBlockTransferZone, (void*)110, sizeof(assemblyBlockTransferZone));	
+						isAssemblyBlockTransferZoneFound = true;
+
+						printNode(&assemblyBlockTransferZone, "assemblyBlockTransferZone");
+					}
+
+					blink(YELLOW, 3);
+					
+				}  // found one transfer zone
+				break;
+			} // detected trnsfer zone
+		}
+		
+		backSensorPanel(ENABLE);
+		while(!isNode())
+			line_following_reverse_pd_slow();
+
+		backSensorPanel(DISABLE);
+		rotateAntiClockwise180();
+		//gotoNextFrontNodeUnknownDistance();
+		updateState(EAST);
+
+		gotoNextFrontNodeUnknownDistance();
+		updateState(createNode(3,1));
+		stop(50);
+		gotoAdjacentNodeSlow(createNode(2,1));
+		stop(50);
+		gotoAdjacentNodeSlow(createNode(2,0));
+		stop(500);
+	
+		//fourth place
+		Serial.println("Go through fourth zone");
+
+		backSensorPanel(ENABLE);
+
+		if(isNode())
+			while(isNode())
+				moveForward(150,150);
+
+		delay(10);
+
+		beginEncoderCount = getRighttEncoderCount();
+		EnCounter = getRighttEncoderCount()-beginEncoderCount;
+
+		while(EnCounter<24){
+			line_following_pd_slow_slow();
+
+			EnCounter = getRighttEncoderCount()-beginEncoderCount;
+			if(EnCounter>8 && SensorFrontLeft==WHITE && SensorFrontRight==WHITE && SensorMiddleLeft==WHITE && SensorMiddleRight==WHITE){
+
+				stop();
+				blink(YELLOW, 1);
+
+				if(isKeyBlockTransferZoneFound || isAssemblyBlockTransferZoneFound){ //one transfer zone is already found
+
+					if(isKeyBlockTransferZoneFound && keyBlockTranserzone.x != currentPosition.x){
+						assemblyBlockTransferZone.x = currentPosition.x;
+
+						//write transfer zone location to EEPROM
+						eeprom_write_block((const void*)&assemblyBlockTransferZone, (void*)110, sizeof(assemblyBlockTransferZone));	
+						isAssemblyBlockTransferZoneFound = true;
+
+						printNode(&assemblyBlockTransferZone, "assemblyBlockTransferZone");
+					}
+					else if(isAssemblyBlockTransferZoneFound && assemblyBlockTransferZone.x != currentPosition.x){
+						keyBlockTranserzone.x = currentPosition.x;
+
+						//write transfer zone location to EEPROM
+						eeprom_write_block((const void*)&keyBlockTranserzone, (void*)100, sizeof(keyBlockTranserzone));	
+						isKeyBlockTransferZoneFound = true;
+						printNode(&keyBlockTranserzone, "keyBlockTranserzone");
+
+					}
+					blink(YELLOW,3);
+
+					backSensorPanel(ENABLE);
+					while(!isNode())
+						line_following_reverse_pd_slow_slow();
+
+					backSensorPanel(DISABLE);
+
+					turnToDirection(SOUTH);
+
+					for(int count=0; count<2; count++){
+						gotoNextFrontNode();
+						delay(100);
+					}
+
+					turnToDirection(EAST);
+
+					DRY_RUN_STATE = RUN_TYPE_FINISHED;
+					return 1;
+				}
+
+				else{
+					if(Sensor3==WHITE){  // key Block
+
+						keyBlockTranserzone.x = currentPosition.x;
+
+						//write transfer zone location to EEPROM
+						eeprom_write_block((const void*)&keyBlockTranserzone, (void*)100, sizeof(keyBlockTranserzone));	
+						isKeyBlockTransferZoneFound = true;
+
+						printNode(&keyBlockTranserzone, "keyBlockTranserzone");
+					}
+					else{
+
+						assemblyBlockTransferZone.x = currentPosition.x;
+
+						//write transfer zone location to EEPROM
+						eeprom_write_block((const void*)&assemblyBlockTransferZone, (void*)110, sizeof(assemblyBlockTransferZone));	
+						isAssemblyBlockTransferZoneFound = true;
+
+						printNode(&assemblyBlockTransferZone, "assemblyBlockTransferZone");
+					}
+
+					blink(YELLOW, 3);
+					
+				}  // found one transfer zone
+				break;
+			} // detected trnsfer zone
+		}
+		
+		backSensorPanel(ENABLE);
+		while(!isNode())
+			line_following_reverse_pd_slow();
+
+		backSensorPanel(DISABLE);
+		rotateAntiClockwise180();
+		//gotoNextFrontNodeUnknownDistance();
+		updateState(EAST);
+
+		gotoNextFrontNodeUnknownDistance();
+		updateState(createNode(2,1));
+		stop(50);
+		gotoAdjacentNode(createNode(3,1));
+		stop(50);
+		gotoAdjacentNode(createNode(4,1));
+		stop(50);
+		gotoAdjacentNodeSlow(createNode(5,1));
+		stop(50);
+		gotoAdjacentNodeSlow(createNode(5,0));
+		stop(500);
+	}
+
+	if(!isKeyBlockTransferZoneFound){
+		while(1){
+			stop();
+		}
+	}
+
+	return 0;
+}
+
+void depositeMoneyBox(node *moneyBoxCoordination){
+	path routePath;
+	node routePathNodes[(NO_OF_GRID_ROWS-1)*(NO_OF_GRID_COLUMNS-1)];
+	routePath.nodes = routePathNodes;
+	optimalPathFinder.getShortestPath(currentPosition, currentDirection, createNode(moneyBoxCoordination->x, moneyBoxCoordination->y), &routePath);
+
+	
+	Serial.println();
+	Serial.print("Path to money Box: ");
+	showPath(&routePath);
+	Serial.println();
+	
+	                                               //routePath.length-1
+	for(int counter0=0; counter0<(routePath.length-2); counter0++){
+		gotoAdjacentNode(routePath.nodes[counter0]);
+		delay(50);
+	}
+
+	//today
+	if(routePath.length>1)
+		gotoAdjacentNodeSlow(routePath.nodes[routePath.length-2]);
+
+	turnTowardAdjacentNode(currentPosition, routePath.nodes[routePath.length-1]);
+
+	releaseFrontBox();
+
+	int beginEncoderCount = getRighttEncoderCount();
+	int EnCount = getRighttEncoderCount() - beginEncoderCount;
+	moveForward(200,200);
+	while(isNode() && EnCount<6){
+		EnCount = getRighttEncoderCount() - beginEncoderCount;
+	}
+	
+	beginEncoderCount = getRighttEncoderCount();
+
+	while((getRighttEncoderCount()-beginEncoderCount)<31){  
+		line_following_pd_slow();
+	}
+	while((getRighttEncoderCount()-beginEncoderCount)<33){ 
+		moveForward(100,100);
+	}
+	moveForward(80,80);
+	delay(100);
+	stop(); 
+
+	//grabBox
+	grabFrontBox();
+	delay(500);
+	//Serial.println("Box grabed! ");
+	
+	//4_12_2012
+	if(grid[routePath.nodes[routePath.length-1].x][routePath.nodes[routePath.length-1].y]){
+
+		if(routePath.nodes[routePath.length-1].y == 0 && routePath.nodes[routePath.length-1].x > 1 && routePath.nodes[routePath.length-1].x != keyBlockTranserzone.x && currentDirection == WEST){
+			rotateClockwise90bySensors();
+			gotoNextFrontNode();
+			
+			updateState(getReverseDirection(currentDirection),currentPosition);
+		}
+		else{
+			gotoNextFrontNode();
+			updateState(currentDirection,routePath.nodes[routePath.length-1]);
+		}
+
+		//route to deposition area
+		optimalPathFinder.getShortestPath(currentPosition, currentDirection, createNode(1, 0), &routePath);
+
+	}else{
+
+		if(currentPosition.y == 0 && currentPosition.x>1){
+			if(currentDirection == NORTH)
+				rotateAntiClockwise90bySensors();
+			else
+				rotateClockwise90bySensors();
+		}
+		else
+			rotateClockwise90bySensors();  //turn by 180 degree
+
+		//gotoNextFrontNode();
+		if(routePath.length>1)
+			updateState(getReverseDirection(currentDirection),routePath.nodes[routePath.length-2]);
+		else
+			updateState(getReverseDirection(currentDirection),currentPosition);
+
+		//route to deposition area
+		optimalPathFinder.getShortestPath(currentPosition, currentDirection, createNode(1, 0), &routePath);
+
+		showPath(&routePath);
+
+		printNode(&currentPosition, "Current potition");
+		Serial.print("  direction: ");
+		Serial.println(currentDirection);
+
+		if(currentPosition.y == 0 && currentPosition.x > 1 && currentPosition.x != keyBlockTranserzone.x && currentDirection == WEST){
+
+			if(isAdjacent(currentPosition, routePath.nodes[0]) == SOUTH){  //path goes to south direction
+
+				/*
+				beginEncoderCount = getRighttEncoderCount();
+				while((getRighttEncoderCount()-beginEncoderCount)<30){
+					line_following_pd();
+				}
+				*/
+
+				stop(200);
+
+				beginEncoderCount = getRighttEncoderCount();
+				while((getRighttEncoderCount()-beginEncoderCount)<6){
+					rotateClockwise(200,200);
+				}
+
+				while(Sensor5==WHITE){
+					moveForward(200,200);
+				}
+
+				while(Sensor5==BLACK){
+					moveForward(200,200);
+				}
+
+				while(SensorFrontLeft==BLACK || SensorFrontRight==BLACK){
+					rotateClockwise(200,200);
+				}
+				stop(100);
+				updateState(SOUTH,currentPosition);
+			}
+
+			else if(isAdjacent(currentPosition, routePath.nodes[0]) == NORTH){  //path goes to north
+
+				/*
+				beginEncoderCount = getRighttEncoderCount();
+				while((getRighttEncoderCount()-beginEncoderCount)<30){
+					line_following_pd();
+				}
+				*/
+
+				stop(200);
+
+				beginEncoderCount = getRighttEncoderCount();
+				while((getRighttEncoderCount()-beginEncoderCount)<6){
+					rotateAntiClockwise(200,200);
+				}
+
+				while(Sensor5==WHITE){
+					moveForward(200,200);
+				}
+
+				while(Sensor5==BLACK){
+					moveForward(200,200);
+				}
+
+				while(SensorFrontLeft==BLACK || SensorFrontRight==BLACK){
+					rotateAntiClockwise(200,200);
+				}
+				stop(100);
+				updateState(NORTH,currentPosition);
+			}
+		}
+		else{
+			gotoNextFrontNode();
+			stop(100);
+		}
+	}
+
+	//debug
+	//printNode(&currentPosition, "Robot at");
+
+	
+
+	/*
+	Serial.println();
+	Serial.print("Path to Deposition Area: ");
+	showPath(&routePath);
+	Serial.println();
+	*/
+
+	for(int counter0=0; counter0<(routePath.length); counter0++){
+
+		//check if node.y=0; then may be robot should reverse
+		printNode(&routePath.nodes[counter0],"Next node");
+		if(routePath.nodes[counter0].y == 0 && routePath.nodes[counter0].x > 1 && routePath.nodes[counter0].x != keyBlockTranserzone.x && currentPosition.y==1){
+
+			Serial.println("Danger node");
+
+			turnTowardAdjacentNode(currentPosition, routePath.nodes[counter0]);
+
+			beginEncoderCount = getRighttEncoderCount();
+			while((getRighttEncoderCount()-beginEncoderCount)<27){
+				line_following_pd();
+			}
+
+			stop(200);
+
+			beginEncoderCount = getRighttEncoderCount();
+			while((getRighttEncoderCount()-beginEncoderCount)<6){
+				rotateClockwise(200,200);
+			}
+
+			while(Sensor5==WHITE){
+				moveForward(200,200);
+			}
+
+			while(Sensor5==BLACK){
+				moveForward(200,200);
+			}
+
+			while(SensorFrontLeft==BLACK || SensorFrontRight==BLACK){
+				rotateClockwise(200,200);
+			}
+			gotoNextFrontNode();
+			counter0++;
+
+			stop(100);
+
+			updateState(SOUTH, routePath.nodes[counter0]);
+
+		}
+		else{
+			gotoAdjacentNode(routePath.nodes[counter0]);
+			delay(10);
+		}
+	}
+	printNode(&currentPosition, "Robot at");
+
+	turnToDirection(WEST);
+	delay(50);
+
+	beginEncoderCount = getRighttEncoderCount();
+	while((getRighttEncoderCount()-beginEncoderCount)<12){
+		line_following_pd_slow();
+	}
+	stop();
+	//delay(500);
+	releaseFrontBox();
+	delay(500);
+
+	while(!isNode())
+		line_following_reverse_pd();
+
+	stop(500);
+
+	Serial.println("Box deposited! ");
+}
+
+void waitForTheKey(){
+	path pathToTransferZone;
+	node transferZonePathNodes[(NO_OF_GRID_ROWS-1)*(NO_OF_GRID_COLUMNS-1)];
+	pathToTransferZone.nodes = transferZonePathNodes;
+	optimalPathFinder.getShortestPath(currentPosition, currentDirection, createNode(keyBlockTranserzone.x, 0), &pathToTransferZone);
+
+	//debug
+	Serial.println();
+	Serial.print("Path to tansfer zone");
+	showPath(&pathToTransferZone);
+	Serial.println();
+	
+	//rotateAntiClockwise90();
+	//updateState(NORTH, currentPosition);
+
+	for(int counter0=0; counter0<(pathToTransferZone.length-1); counter0++){
+
+		/*
+		gotoAdjacentNode(pathToTransferZone.nodes[counter0]);
+		delay(100);
+		*/
+		if(pathToTransferZone.nodes[counter0].y == 0 && pathToTransferZone.nodes[counter0].x > 1 && pathToTransferZone.nodes[counter0].x != keyBlockTranserzone.x && currentPosition.y==1){
+			
+			if(isAdjacent(pathToTransferZone.nodes[counter0], pathToTransferZone.nodes[counter0+1]) == SOUTH){  //path goes to south direction
+
+				
+				int beginEncoderCount = getRighttEncoderCount();
+				while((getRighttEncoderCount()-beginEncoderCount)<27){
+					line_following_pd();
+				}
+
+				stop(200);
+
+				beginEncoderCount = getRighttEncoderCount();
+				while((getRighttEncoderCount()-beginEncoderCount)<6){
+					rotateClockwise(200,200);
+				}
+
+				while(Sensor5==WHITE){
+					moveForward(200,200);
+				}
+
+				while(Sensor5==BLACK){
+					moveForward(200,200);
+				}
+
+				while(SensorFrontLeft==BLACK || SensorFrontRight==BLACK){
+					rotateClockwise(200,200);
+				}
+				stop(100);
+
+				gotoNextFrontNode();
+				stop(100);
+				updateState(SOUTH,pathToTransferZone.nodes[counter0+1]);
+				counter0++;
+			}
+
+			else if(isAdjacent(pathToTransferZone.nodes[counter0], pathToTransferZone.nodes[counter0+1]) == NORTH){  //path goes to north
+
+				int beginEncoderCount = getRighttEncoderCount();
+				while((getRighttEncoderCount()-beginEncoderCount)<27){
+					line_following_pd();
+				}
+
+				stop(200);
+
+				beginEncoderCount = getRighttEncoderCount();
+				while((getRighttEncoderCount()-beginEncoderCount)<6){
+					rotateAntiClockwise(200,200);
+				}
+
+				while(Sensor5==WHITE){
+					moveForward(200,200);
+				}
+
+				while(Sensor5==BLACK){
+					moveForward(200,200);
+				}
+
+				while(SensorFrontLeft==BLACK || SensorFrontRight==BLACK){
+					rotateAntiClockwise(200,200);
+				}
+				stop(100);
+
+				gotoNextFrontNode();
+				stop(100);
+				updateState(NORTH,pathToTransferZone.nodes[counter0+1]);
+				counter0++;
+			}
+			/*
+			gotoAdjacentNodeSlow(pathToTransferZone.nodes[counter0]);
+			delay(100);
+			*/
+		}
+		else{
+			gotoAdjacentNode(pathToTransferZone.nodes[counter0]);
+			delay(100);
+		}
+	}
+
+	gotoAdjacentNodeSlow(pathToTransferZone.nodes[pathToTransferZone.length-1]);
+
+	stop(100);
+	
+	turnToDirection(EAST);
+
+	stop(100);
+
+	int beginEncoderCount = getRighttEncoderCount();
+
+	while((getRighttEncoderCount()-beginEncoderCount)<30){  
+		line_following_pd();
+	}
+
+	stop(100);
+
+	rotateAntiClockwise90bySensors();
+
+	stop(100);
+
+	gotoNextFrontNodeSlow();
+
+	updateState(WEST, currentPosition);
+
+	stop(100);
+
+	unsigned int distance;
+
+	while(1){
+		distance = getFrontSonarReading();
+
+		if(0<distance && distance<5)
+			break;
+		delay(500);
+	}
+
+	Serial.println("Key Box at transfer zone");
+	blink(RED, 10);
+	delay(WAITING_TIME_FOR_THE_KEY);
+}
+
+void unlockTheTreasure(){
+	/*
+	Serial.print("Current direction: ");
+	Serial.println(currentDirection);
+
+	unsigned int distanceToKey = getFrontSonarReading();
+	Serial.print("Distance to the key");
+	delay(30);
+	Serial.println(getFrontSonarReading());
+
+	/*
+	int beginEncoderCount = getRighttEncoderCount();
+	while((getRighttEncoderCount()-beginEncoderCount)<(distanceToKey*2-3)){  //(getRighttEncoderCount()-beginEncoderCount)<distanceToKey*2
+		line_following_pd();
+	}
+	*/
+	/*
+	int beginEncoderCount = getRighttEncoderCount();
+	while((getRighttEncoderCount()-beginEncoderCount)<(distanceToKey*2-16)){  //(getRighttEncoderCount()-beginEncoderCount)<distanceToKey*2
+		line_following_pd_slow();
+	}
+	while((getRighttEncoderCount()-beginEncoderCount)<(distanceToKey*2-8)){  //(getRighttEncoderCount()-beginEncoderCount)<distanceToKey*2
+		moveForward(100,100);
+	}
+	*/
+	stop(500);
+
+	grabFrontBox();
+	delay(1000);
+
+	/*
+	while(!isNode())
+		line_following_reverse_pd();
+
+	while(isNode())
+		line_following_reverse_pd();
+
+	beginEncoderCount = getRighttEncoderCount();
+	while((getRighttEncoderCount()-beginEncoderCount)<20){  //(getRighttEncoderCount()-beginEncoderCount)<distanceToKey*2
+		line_following_reverse_pd();
+	}
+
+	stop(100);
+
+	while(!isNode())
+		line_following_pd();
+
+	stop(100);
+	*/
+	/*
+	rotateAntiClockwise180();
+
+	while(!isNode())
+		line_following_pd_slow();
+
+	updateState(EAST, currentPosition);
+	*/
+
+	path pathToUnlockZone;
+	node unlockZonePathNodes[(NO_OF_GRID_ROWS-1)*(NO_OF_GRID_COLUMNS-1)];
+	pathToUnlockZone.nodes = unlockZonePathNodes;
+	
+	//find a path
+	optimalPathFinder.getShortestPath(currentPosition, currentDirection, createNode(0, 4), &pathToUnlockZone);
+
+	//debug
+	Serial.println();
+	Serial.print("Path to tansfer zone");
+	showPath(&pathToUnlockZone);
+	Serial.println();
+
+	//go to unlock zone
+	for(int counter0=0; counter0<(pathToUnlockZone.length-1); counter0++){
+		gotoAdjacentNode(pathToUnlockZone.nodes[counter0]);
+		delay(50);
+	}
+
+	turnTowardAdjacentNode(currentPosition, pathToUnlockZone.nodes[pathToUnlockZone.length-1]);
+	delay(50);
+
+	/*
+	beginEncoderCount = getRighttEncoderCount();
+	while((getRighttEncoderCount()-beginEncoderCount)<40){
+		line_following_reverse_pd();
+	}
+
+	stop(50);
+
+	while(!isNode())
+		line_following_pd_slow();
+	*/
+
+	int beginEncoderCount = getRighttEncoderCount();
+	while((getRighttEncoderCount()-beginEncoderCount)<33){
+		line_following_pd_slow();
+	}
+	stop(100);
+
+	releaseFrontBox();
+
+	stop();
+}
+
+node findMoneyBox(){
+	//optimalPathFinder.refreshGrid();
+	node moneyBox;
+
+	//to save result from isObjectDetected() function
+	int theSensor=2;
+	unsigned int distance;
+	
+	//create optimal search path
+	path optimalSearchPath;
+	node optimalSearchPathNodes[(NO_OF_GRID_ROWS-1)*(NO_OF_GRID_COLUMNS-1)];
+	optimalSearchPath.nodes = optimalSearchPathNodes;
+	createOptimalSearchPath(&optimalSearchPath);
+
+	//debug
+	Serial.println();
+	Serial.print("Search Path");
+	showPath(&optimalSearchPath);
+	Serial.println();
+
+	gotoAdjacentNode(createNode(0,0));
+	turnToDirection(NORTH);
+	delay(30);
+	if(isObjectDetected(&theSensor, &distance)){
+
+		int objectDirection= currentDirection+theSensor;
+		if(objectDirection==4)
+			objectDirection=0;
+		else if(objectDirection==-1)
+			objectDirection=3;
+
+		int shift = (distance+20)/30;
+
+		if(shift != 0){                              // 11 12 2012
+
+			switch(objectDirection){
+				case 0: return createNode(currentPosition.x+shift, currentPosition.y);
+				case 1: return createNode(currentPosition.x, currentPosition.y+shift);
+				case 2: return createNode(currentPosition.x-shift, currentPosition.y);
+				case 3: return createNode(currentPosition.x, currentPosition.y-shift);
+			}
+		}
+	}
+	delay(50);
+
+	for(int counter0=0; counter0<optimalSearchPath.length; counter0++){
+
+		gotoAdjacentNode(optimalSearchPath.nodes[counter0]);
+
+		//debug
+		//sendSonarReadings();
+		//delay(30);
+
+		if(isObjectDetected(&theSensor, &distance)){
+			int objectDirection= currentDirection+theSensor;
+			if(objectDirection==4)
+				objectDirection=0;
+			else if(objectDirection==-1)
+				objectDirection=3;
+
+			int shift = (distance+20)/30;
+
+			switch(objectDirection){
+				case 0: return createNode(currentPosition.x+shift, currentPosition.y);
+				case 1: return createNode(currentPosition.x, currentPosition.y+shift);
+				case 2: return createNode(currentPosition.x-shift, currentPosition.y);
+				case 3: return createNode(currentPosition.x, currentPosition.y-shift);
+			}
+		}
+		//delay(200);
+	}
+
+	optimalPathFinder.getShortestPath(currentPosition, currentDirection, createNode(0,0), &optimalSearchPath);
+	for(int counter0=0; counter0<optimalSearchPath.length; counter0++){
+
+		gotoAdjacentNode(optimalSearchPath.nodes[counter0]);
+
+		//debug
+		//sendSonarReadings();
+		//delay(30);
+
+		if(isObjectDetected(&theSensor, &distance)){
+			int objectDirection= currentDirection+theSensor;
+			if(objectDirection==4)
+				objectDirection=0;
+			else if(objectDirection==-1)
+				objectDirection=3;
+
+			int shift = (distance+20)/30;
+
+			switch(objectDirection){
+				case 0: return createNode(currentPosition.x+shift, currentPosition.y);
+				case 1: return createNode(currentPosition.x, currentPosition.y+shift);
+				case 2: return createNode(currentPosition.x-shift, currentPosition.y);
+				case 3: return createNode(currentPosition.x, currentPosition.y-shift);
+			}
+		}
+		//delay(200);
+	}
+
+	return createNode(0,0);
+}
+
+void testGridRunWithServo(){
+	path dryRunPath;
+	node dryRunNodes[(NO_OF_GRID_ROWS-1)*(NO_OF_GRID_COLUMNS-1)];
+	dryRunPath.nodes = dryRunNodes;
+	createDryRunPath(&dryRunPath);
+	
+	for(int counter0=0; counter0<dryRunPath.length; counter0++){
+
+		int direction = isAdjacent(currentPosition, dryRunPath.nodes[counter0]);
+
+		if(turnToDirection(direction)){
+			
+			if(readFrontSharpShortRange<200 && readFrontSharpShortRange>100){
+				//grab box
+				while(readFrontSharpShortRange<600)
+					line_following_pd();
+				stop();
+				delay(1000);
+				grabFrontBox();
+				delay(1000);
+			}
+
+			gotoNextFrontNode();
+			updateState(direction,dryRunPath.nodes[counter0]);
+			//gotoAdjacentNode(dryRunPath.nodes[counter0]);
+		}
+
+		
+		delay(1000);
+		releaseFrontBox();
+		Serial.print(getRighttEncoderCount());
+		Serial.print(" ");
+	}
+	DRY_RUN_STATE = RUN_TYPE_FINISHED;
+
+}
+
+/*!
+ * @function    discoverGrid
+ * @abstract    Discover Grid while the dry run
+ * @discussion  When this function called. Autonomous bot will generate the dry run path.
+ *              Go through it. And record data about nodes(junctions), obstacles and landing zones.
+ *              After that it'll write that data to EEPROM.
+ * @param       NO_OF_GRID_ROWS      Number of rows that grid has; for calculation
+ * @param       NO_OF_GRID_COLUMNS   Number of columns that grid has(must use sign convention) 
+ * @result      EEPROM will have grid data. returns nothing.
+ */
+void discoverGrid(){
+	path dryRunPath;
+	node dryRunNodes[(NO_OF_GRID_ROWS-1)*(NO_OF_GRID_COLUMNS-1)];
+	dryRunPath.nodes = dryRunNodes;
+	createDryRunPath(&dryRunPath);
+	
+	//debug
+	showPath(&dryRunPath);
+
+	gotoAdjacentNodeDistanceUnknown(dryRunPath.nodes[0]);
+	updateState(dryRunPath.nodes[0]);
+	
+	for(int counter0=1; counter0<dryRunPath.length; counter0++){
+
+		if(counter0 == (dryRunPath.length-1))
+			gotoAdjacentNodeSlow(dryRunPath.nodes[counter0]);
+		else if(isAdjacent(dryRunPath.nodes[counter0], dryRunPath.nodes[counter0+1]) != currentDirection)
+			gotoAdjacentNodeSlow(dryRunPath.nodes[counter0]);
+		else
+			gotoAdjacentNode(dryRunPath.nodes[counter0]);
+
+		stop(50);
+		//printNode(&currentPosition,"Current Node");
+		if(isBlockedNode()){
+			grid[dryRunPath.nodes[counter0].x][dryRunPath.nodes[counter0].y] = NODE_IS_BLOCKED;
+			blink(RED,1);
+		}
+
+		//delay(50);
+		//Serial.print(getRighttEncoderCount());
+		//Serial.print(" ");
+	}
+
+	//EEPROM_writeData(0,grid);
+	eeprom_write_block((const void*)&grid, (void*)0, sizeof(grid));
+	//indicate about finish
+}
+
+void discoverMissingNodes(){
+	path dryRunPath;
+	node dryRunNodes[(NO_OF_GRID_ROWS-1)*(NO_OF_GRID_COLUMNS-1)+10]; // 10 -> 4
+	dryRunPath.nodes = dryRunNodes;
+	createDryRunPathAlternative(&dryRunPath,0); // create advanced dry run path 
+	
+	//debug
+	showPath(&dryRunPath);
+
+	eeprom_read_block((void*)&grid, (void*)0, sizeof(grid));
+	Serial.println("previous grid");
+	sendGridStatus();
+	
+	for(int counter0=0; counter0<dryRunPath.length; counter0++){
+
+		gotoAdjacentNode(dryRunPath.nodes[counter0]);
+		//printNode(&currentPosition,"Current Node");
+		if(isBlockedNode()){
+			grid[dryRunPath.nodes[counter0].x][dryRunPath.nodes[counter0].y] = NODE_IS_BLOCKED;
+			blink(RED,1);
+		}
+
+		delay(50);
+	}
+
+	eeprom_write_block((const void*)&grid, (void*)0, sizeof(grid));
+	//indicate about finish
+}
+
+int getReverseDirection(int direction){
+	direction +=2;
+	if(direction==4)
+		direction = 0;
+	else if(direction==5)
+		direction = 1;
+	return direction;
+}
+
+//abandoned
+void setPathfolowingPID(boolean isWithBox){
+	if(isWithBox)
+		setPID(0.16,0.001,6);  // change this values; should be larger...
+	else
+		setPID(0.16,0.001,6); 
+}

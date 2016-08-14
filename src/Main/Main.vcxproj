@@ -1,0 +1,179 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{29FE854C-000D-412E-86E4-01878CA05C5B}</ProjectGuid>
+    <RootNamespace>Main</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v110</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v110</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>D:\Softwares\arduino-0023\hardware\arduino\cores\arduino;D:\Softwares\arduino-0023\libraries\Servo;D:\Softwares\arduino-0023\libraries\Servo\utility;D:\Softwares\arduino-0023\libraries\LiquidCrystal;D:\Softwares\arduino-0023\libraries\LiquidCrystal\utility;D:\Softwares\arduino-0023\libraries\QTRSensors;D:\Softwares\arduino-0023\libraries\QTRSensors\utility;D:\Softwares\arduino-0023\libraries\NewPing;D:\Softwares\arduino-0023\libraries\NewPing\utility;d:\softwares\arduino-0023\hardware\tools\avr\avr\include\;d:\softwares\arduino-0023\hardware\tools\avr\avr\include\avr\;d:\softwares\arduino-0023\hardware\tools\avr\avr\;d:\softwares\arduino-0023\hardware\tools\avr\lib\gcc\avr\4.3.2\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <ForcedIncludeFiles>C:\Users\Diunuge\Desktop\iNexus_2013.git\Programing\Robo-1 Autonomous\Main Code\Main - Copy\Visual Micro\.Main - Copy.vsarduino.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <IgnoreStandardIncludePath>true</IgnoreStandardIncludePath>
+      <PreprocessorDefinitions>ARDUINO=23;__AVR_ATmega1280__;F_CPU=16000000L;__AVR__;__cplusplus;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <None Include="Main.pde">
+      <FileType>CppCode</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="algorithm.h" />
+    <ClInclude Include="algorithm_beta.h">
+      <FileType>CppCode</FileType>
+    </ClInclude>
+    <ClInclude Include="aStar.h" />
+    <ClInclude Include="configuration.h" />
+    <ClInclude Include="D:\Softwares\arduino-0023\hardware\arduino\cores\arduino\binary.h" />
+    <ClInclude Include="D:\Softwares\arduino-0023\hardware\arduino\cores\arduino\HardwareSerial.h" />
+    <ClInclude Include="D:\Softwares\arduino-0023\hardware\arduino\cores\arduino\pins_arduino.h" />
+    <ClInclude Include="D:\Softwares\arduino-0023\hardware\arduino\cores\arduino\Print.h" />
+    <ClInclude Include="D:\Softwares\arduino-0023\hardware\arduino\cores\arduino\Stream.h" />
+    <ClInclude Include="D:\Softwares\arduino-0023\hardware\arduino\cores\arduino\WCharacter.h" />
+    <ClInclude Include="D:\Softwares\arduino-0023\hardware\arduino\cores\arduino\WConstants.h" />
+    <ClInclude Include="D:\Softwares\arduino-0023\hardware\arduino\cores\arduino\wiring.h" />
+    <ClInclude Include="D:\Softwares\arduino-0023\hardware\arduino\cores\arduino\wiring_private.h" />
+    <ClInclude Include="D:\Softwares\arduino-0023\hardware\arduino\cores\arduino\WProgram.h" />
+    <ClInclude Include="D:\Softwares\arduino-0023\hardware\arduino\cores\arduino\WString.h" />
+    <ClInclude Include="dataTypes.h" />
+    <ClInclude Include="debug.h" />
+    <ClInclude Include="diuEEPROM.h" />
+    <ClInclude Include="diuOptimalPath.h" />
+    <ClInclude Include="diuServo.h">
+      <FileType>CppCode</FileType>
+    </ClInclude>
+    <ClInclude Include="diuSonar.h">
+      <FileType>CppCode</FileType>
+    </ClInclude>
+    <ClInclude Include="diuSwitch.h">
+      <FileType>CppCode</FileType>
+    </ClInclude>
+    <ClInclude Include="E:\Electronic\Softwares\Arduino Setup\arduino-0023\hardware\arduino\cores\arduino\binary.h" />
+    <ClInclude Include="E:\Electronic\Softwares\Arduino Setup\arduino-0023\hardware\arduino\cores\arduino\HardwareSerial.h" />
+    <ClInclude Include="E:\Electronic\Softwares\Arduino Setup\arduino-0023\hardware\arduino\cores\arduino\pins_arduino.h" />
+    <ClInclude Include="E:\Electronic\Softwares\Arduino Setup\arduino-0023\hardware\arduino\cores\arduino\Print.h" />
+    <ClInclude Include="E:\Electronic\Softwares\Arduino Setup\arduino-0023\hardware\arduino\cores\arduino\Stream.h" />
+    <ClInclude Include="E:\Electronic\Softwares\Arduino Setup\arduino-0023\hardware\arduino\cores\arduino\WCharacter.h" />
+    <ClInclude Include="E:\Electronic\Softwares\Arduino Setup\arduino-0023\hardware\arduino\cores\arduino\WConstants.h" />
+    <ClInclude Include="E:\Electronic\Softwares\Arduino Setup\arduino-0023\hardware\arduino\cores\arduino\wiring.h" />
+    <ClInclude Include="E:\Electronic\Softwares\Arduino Setup\arduino-0023\hardware\arduino\cores\arduino\wiring_private.h" />
+    <ClInclude Include="E:\Electronic\Softwares\Arduino Setup\arduino-0023\hardware\arduino\cores\arduino\WProgram.h" />
+    <ClInclude Include="E:\Electronic\Softwares\Arduino Setup\arduino-0023\hardware\arduino\cores\arduino\WString.h" />
+    <ClInclude Include="E:\Electronic\Softwares\Arduino Setup\arduino-0023\libraries\LiquidCrystal\LiquidCrystal.h" />
+    <ClInclude Include="E:\Electronic\Softwares\Arduino Setup\arduino-0023\libraries\QTRSensors\QTRSensors.h" />
+    <ClInclude Include="E:\Electronic\Softwares\Arduino Setup\arduino-0023\libraries\Servo\Servo.h" />
+    <ClInclude Include="encoder.h" />
+    <ClInclude Include="fsa.h">
+      <FileType>CppCode</FileType>
+    </ClInclude>
+    <ClInclude Include="indicator.h" />
+    <ClInclude Include="motion.h" />
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="sensorPanel.h" />
+    <ClInclude Include="sharpIR.h" />
+    <ClInclude Include="status.h" />
+    <ClInclude Include="test.h" />
+    <ClInclude Include="Visual Micro\.Main - Copy.vsarduino.h" />
+    <ClInclude Include="Visual Micro\.Main.vsarduino.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="D:\Softwares\arduino-0023\hardware\arduino\cores\arduino\HardwareSerial.cpp" />
+    <ClCompile Include="D:\Softwares\arduino-0023\hardware\arduino\cores\arduino\main.cpp" />
+    <ClCompile Include="D:\Softwares\arduino-0023\hardware\arduino\cores\arduino\pins_arduino.c" />
+    <ClCompile Include="D:\Softwares\arduino-0023\hardware\arduino\cores\arduino\Print.cpp" />
+    <ClCompile Include="D:\Softwares\arduino-0023\hardware\arduino\cores\arduino\Tone.cpp" />
+    <ClCompile Include="D:\Softwares\arduino-0023\hardware\arduino\cores\arduino\WInterrupts.c" />
+    <ClCompile Include="D:\Softwares\arduino-0023\hardware\arduino\cores\arduino\wiring.c" />
+    <ClCompile Include="D:\Softwares\arduino-0023\hardware\arduino\cores\arduino\wiring_analog.c" />
+    <ClCompile Include="D:\Softwares\arduino-0023\hardware\arduino\cores\arduino\wiring_digital.c" />
+    <ClCompile Include="D:\Softwares\arduino-0023\hardware\arduino\cores\arduino\wiring_pulse.c" />
+    <ClCompile Include="D:\Softwares\arduino-0023\hardware\arduino\cores\arduino\wiring_shift.c" />
+    <ClCompile Include="D:\Softwares\arduino-0023\hardware\arduino\cores\arduino\WMath.cpp" />
+    <ClCompile Include="D:\Softwares\arduino-0023\hardware\arduino\cores\arduino\WString.cpp" />
+    <ClCompile Include="E:\Electronic\Softwares\Arduino Setup\arduino-0023\hardware\arduino\cores\arduino\Print.cpp" />
+    <ClCompile Include="E:\Electronic\Softwares\Arduino Setup\arduino-0023\hardware\arduino\cores\arduino\Tone.cpp" />
+    <ClCompile Include="E:\Electronic\Softwares\Arduino Setup\arduino-0023\hardware\arduino\cores\arduino\WInterrupts.c" />
+    <ClCompile Include="E:\Electronic\Softwares\Arduino Setup\arduino-0023\hardware\arduino\cores\arduino\wiring.c" />
+    <ClCompile Include="E:\Electronic\Softwares\Arduino Setup\arduino-0023\hardware\arduino\cores\arduino\wiring_analog.c" />
+    <ClCompile Include="E:\Electronic\Softwares\Arduino Setup\arduino-0023\hardware\arduino\cores\arduino\wiring_digital.c" />
+    <ClCompile Include="E:\Electronic\Softwares\Arduino Setup\arduino-0023\hardware\arduino\cores\arduino\wiring_pulse.c" />
+    <ClCompile Include="E:\Electronic\Softwares\Arduino Setup\arduino-0023\hardware\arduino\cores\arduino\wiring_shift.c" />
+    <ClCompile Include="E:\Electronic\Softwares\Arduino Setup\arduino-0023\hardware\arduino\cores\arduino\WMath.cpp" />
+    <ClCompile Include="E:\Electronic\Softwares\Arduino Setup\arduino-0023\hardware\arduino\cores\arduino\WString.cpp" />
+    <ClCompile Include="E:\Electronic\Softwares\Arduino Setup\arduino-0023\libraries\LiquidCrystal\LiquidCrystal.cpp" />
+    <ClCompile Include="E:\Electronic\Softwares\Arduino Setup\arduino-0023\libraries\QTRSensors\QTRSensors.cpp" />
+    <ClCompile Include="E:\Electronic\Softwares\Arduino Setup\arduino-0023\libraries\Servo\Servo.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Main.rc" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+  <ProjectExtensions>
+    <VisualStudio>
+      <UserProperties arduino.board.name="mega" arduino.board.desc="Arduino Mega (ATmega1280)" arduino.board.property_bag="mega.name=Arduino Mega (ATmega1280)&#xD;&#xA;mega.upload.protocol=stk500&#xD;&#xA;mega.upload.maximum_size=126976&#xD;&#xA;mega.upload.speed=57600&#xD;&#xA;mega.bootloader.low_fuses=0xFF&#xD;&#xA;mega.bootloader.high_fuses=0xDA&#xD;&#xA;mega.bootloader.extended_fuses=0xF5&#xD;&#xA;mega.bootloader.path=atmega&#xD;&#xA;mega.bootloader.file=ATmegaBOOT_168_atmega1280.hex&#xD;&#xA;mega.bootloader.unlock_bits=0x3F&#xD;&#xA;mega.bootloader.lock_bits=0x0F&#xD;&#xA;mega.build.mcu=atmega1280&#xD;&#xA;mega.build.f_cpu=16000000L&#xD;&#xA;mega.build.core=arduino&#xD;&#xA;" arduino.build.mcu="atmega1280" arduino.build.f_cpu="16000000L" arduino.build.core="arduino" arduino.upload.protocol="stk500" arduino.upload.speed="57600" arduino.upload.maximum_size="126976" arduino.upload.port="COM80" />
+    </VisualStudio>
+  </ProjectExtensions>
+</Project>
