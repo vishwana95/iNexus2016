@@ -68,6 +68,7 @@ void path_follow_PID();
 void simple_path_follow();
 
 void path_follow_PID_Sonar();
+void path_follow_PID_Arrow();
 
 
 /************************** function definitions ************************/
@@ -611,6 +612,48 @@ void path_follow_PID_Sonar(){
 
 	if(PID_RightRPM > 150)
 		PID_RightRPM = 150;
+
+	Serial.write("\tRpm :( ");
+	Serial.print(PID_LeftRPM);
+	Serial.write(" , ");	
+	Serial.print(PID_RightRPM);
+	Serial.println(" )");	
+
+	moveForward(PID_LeftRPM,PID_RightRPM);
+}
+
+void path_follow_PID_Arrow(){
+
+
+	position = sensorPannel.readLine(sensors);
+	error = (int)position - 3500;
+	Serial.write("\tError :( ");
+	Serial.print(error);
+  
+	int motorSpeedCorrection = Kp_slow * error + Kd_slow* (error - lastError) + Ki_slow*totalError;
+	lastError = error;
+	totalError += error;
+
+	if(motorSpeedCorrection > 50)
+		motorSpeedCorrection = 50;
+	if(motorSpeedCorrection < -50)
+		motorSpeedCorrection = -50;
+
+	PID_LeftRPM = 150;
+	PID_RightRPM = 150 + (int)motorSpeedCorrection;
+
+	if(correction > 0)
+	{
+		PID_LeftRPM  = 150 - (int)motorSpeedCorrection;
+		PID_RightRPM = 150;
+	}
+
+
+	//if(PID_LeftRPM > 150)
+	//	PID_LeftRPM = 150;
+
+	//if(PID_RightRPM > 150)
+	//	PID_RightRPM = 150;
 
 	Serial.write("\tRpm :( ");
 	Serial.print(PID_LeftRPM);

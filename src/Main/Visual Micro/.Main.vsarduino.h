@@ -1,6 +1,6 @@
-//Board = Arduino Mega (ATmega1280)
+//Board = Arduino Mega 2560
 #define ARDUINO 23
-#define __AVR_ATmega1280__
+#define __AVR_ATmega2560__
 #define F_CPU 16000000L
 #define __AVR__
 #define __cplusplus
@@ -26,6 +26,8 @@ extern "C" void __cxa_pure_virtual() {}
 
 //already defined in arduno.h
 //already defined in arduno.h
+int isMazeEnded();
+int isPathEnded();
 void test();
 
 #include "D:\Softwares\arduino-0023\hardware\arduino\cores\arduino\wprogram.h"

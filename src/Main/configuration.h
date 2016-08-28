@@ -83,17 +83,21 @@
  * @abstract    create a object of QTRSensorsAnalog.
  * @discussion  create a object of QTRSensorsAnalog to use analog pid.
  */
-QTRSensorsAnalog sensorPannel((unsigned char[]) {11, 10, 6, 3, 2, 1, 0, 4, 8}, 9);
+//QTRSensorsAnalog sensorPannel((unsigned char[]) {11, 10, 6, 3, 2, 1, 0, 4, 8}, 9);
+QTRSensorsRC sensorPannel((unsigned char[]) {46, 47, 48, 49, 50, 51, 52, 53}, 8);
 
 /*!
  * @var         sensors
  * @abstract    store analog values of sensor panel.
  * @discussion  Stores analog values(0-1024) of main sensor panel. this gets update from sensorPanel.readLine()
  */
-unsigned int sensors[9];
+//unsigned int sensors[9];
+unsigned int sensors[8];
 
-unsigned int sensorValuesMax[9];
-unsigned int sensorValuesMin[9];
+//unsigned int sensorValuesMax[9];
+//unsigned int sensorValuesMin[9];
+unsigned int sensorValuesMax[8];
+unsigned int sensorValuesMin[8];
 
 /*!
  * @var         sensorPannelBack

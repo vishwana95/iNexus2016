@@ -176,9 +176,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="E:\Electronic\Softwares\Arduino Setup\arduino-0023\hardware\arduino\cores\arduino\Print.cpp">
-      <Filter>_core</Filter>
-    </ClCompile>
     <ClCompile Include="E:\Electronic\Softwares\Arduino Setup\arduino-0023\hardware\arduino\cores\arduino\Tone.cpp">
       <Filter>_core</Filter>
     </ClCompile>

@@ -88,12 +88,68 @@ void loop()
 		test();
 	}
 
-	setPID(0.16, 0.0, 8.0);  //0.1,  0 ,  2
-	setPIDSlow(0.16, 0.0, 8.0); 
-	setPIDSlowSlow(0.16, 0.0, 8.0); 
-	setReversePID(0.1,0.0001,6);
-	setReversePIDSlow(0.1,0.0001,6);
-	setReversePIDSlowSlow(0.1,0.0001,16);
+	setPID(8, 0.0, 16); 
+	setPIDSlow(0.16, 0.0, 8.0);
+
+
+	//Elavete the hand
+	setHandElevation(180);
+
+	//Section 1: Maze following
+
+	while(!isMazeEnded()){
+
+		if(getLeftSonarReading()>20){ //There is no left wall
+			//Turn Left
+			rotateAntiClockwise90();
+		}
+		else{
+			if(getFrontSonarReading() > 10){ //There is no front wall
+				//Move forward
+				path_follow_PID_Sonar();
+			}
+			else{
+				if(getRightSonarReading() > 20){ //There is no right wall
+					//turn right
+					rotateClockwise90();
+				}
+				else{
+					//turn back
+					rotateClockwise180();
+				}
+			}
+		}
+	}
+
+	//Section 2: Grab Box
+	//if there is space.. move forward
+	moveForward(150,150);
+	delay(100); //tune the delay
+	stop();
+
+	//Find the color
+
+	setHandElevation(0);
+	grabFrontBox();
+	setHandElevation(180);
+
+	// Section 3: Goto the correect path
+
+	//Follow arrows
+	while(!isPathEnded())
+		path_follow_PID_Arrow();
+
+
+	//Section 4: Drop the box
+	//if there is space.. move forward
+	moveForward(150,150);
+	delay(100); //tune the delay
+	stop();
+
+	setHandElevation(0);
+	releaseFrontBox();
+	setHandElevation(180);
+
 	/*
 	if(isDryRun()){ //this is dry run
 
@@ -241,6 +297,16 @@ void loop()
 }
 /******************   end of loop()   ********************************/
 
+int isMazeEnded(){
+
+	return 0;
+}
+
+int isPathEnded(){
+
+	return 0;
+}
+
 void test(){
 	Serial.println("Testing.. ");
 
@@ -278,26 +344,110 @@ void test(){
 		//testSonar();
 
 		
-
-		if(getLeftSonarReading()>20){ //There is no left wall
-			//Turn Left
-			rotateAntiClockwise90();
-		}
-		else{
-			if(getFrontSonarReading() > 10){ //There is no front wall
-				//Move forward
-				path_follow_PID_Sonar();
+		if(false){
+			if(getLeftSonarReading()>20){ //There is no left wall
+				//Turn Left
+				rotateAntiClockwise90();
 			}
 			else{
-				if(getRightSonarReading() > 20){ //There is no right wall
-					//turn right
-					rotateClockwise90();
+				if(getFrontSonarReading() > 10){ //There is no front wall
+					//Move forward
+					path_follow_PID_Sonar();
 				}
 				else{
-					//turn back
-					rotateClockwise180();
+					if(getRightSonarReading() > 20){ //There is no right wall
+						//turn right
+						rotateClockwise90();
+					}
+					else{
+						//turn back
+						rotateClockwise180();
+					}
 				}
 			}
+		}
+
+		//Testing for RC sensor array
+		if(false){
+
+			for(int i=0; i<8; i++){
+				sensorValuesMax[i] = 1023;
+				sensorValuesMin[i] = 0;
+			}
+
+			// optional: wait for some input from the user, such as  a button press
+ 
+			// then start calibration phase and move the sensors over both
+			// reflectance extremes they will encounter in your application:
+			Serial.println("Calibration is started!");
+
+			int i;
+			for (i = 0; i < 250; i++)  // make the calibration take about 5 seconds
+			{
+				sensorPannel.calibrate();
+				delay(20);
+			}
+
+
+			Serial.println("Calibration is ended!");
+			// optional: signal that the calibration phase is now over and wait for further
+			// input from the user, such as a button press
+
+			unsigned int position;
+
+			for (i = 0; i < 250; i++)  // make the calibration take about 5 seconds
+			{
+				sensorPannel.read(sensors);
+
+				Serial.print("1: ");
+				Serial.print(sensors[0]);
+				Serial.print("  2: ");
+				Serial.print(sensors[1]);
+				Serial.print("  3: ");
+				Serial.print(sensors[2]);
+				Serial.print("  4: ");
+				Serial.print(sensors[3]);
+				Serial.print("  5: ");
+				Serial.print(sensors[4]);
+				Serial.print("  6: ");
+				Serial.print(sensors[5]);
+				Serial.print("  7: ");
+				Serial.print(sensors[6]);
+				Serial.print("  8: ");
+				Serial.print(sensors[7]);
+
+				position = sensorPannel.readLine(sensors);
+
+				Serial.print("\t  Potition: ");
+				Serial.print(position);
+
+				Serial.print("\t  Error: ");
+				Serial.print(3500 - (int)position);
+
+				Serial.println("");
+
+				delay(1000);
+			}
+		}
+
+		if(true){
+
+			Serial.println("Calibration is started!");
+
+			int i;
+			for (i = 0; i < 250; i++)  // make the calibration take about 5 seconds
+			{
+				sensorPannel.calibrate();
+				delay(20);
+			}
+
+
+			Serial.println("Calibration is ended!");
+
+			setPIDSlow(0.16, 0.0, 8.0);
+
+			while(true)
+				path_follow_PID_Arrow();
 		}
 			
 	}
